@@ -1,0 +1,117 @@
+* {
+	font-family: 'Consolas';
+	text-justify: newspaper;
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	font-size: 24px;
+	word-wrap: break-word;
+}
+
+span {
+	word-wrap: break-word;
+}
+
+img {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}
+
+.md-container {
+	padding: 1vw;
+	/* max-width: 1200px; */
+	width: 67%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	display: block;
+	width: fit-content;
+	padding-left: 1vw;
+	padding-right: 1vw;
+	border-left: 5px solid coral;
+	color: coral;
+	box-shadow: black 0px 0px 200px 0px;
+	border-radius: 0.5vw;
+	background: rgba(255, 255, 255, 0.061);
+}
+
+.generic-block {
+	background-color: rgb(21, 23, 27);
+	color: white;
+	padding: 1vw;
+	box-shadow: rgba(0, 0, 0, 0.392) 0px 0px 100px 0px;
+	border-radius: 0.5vw;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.generic-block-inline {
+	background-color: rgb(21, 23, 27);
+	display: inline;
+	color: white;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	box-shadow: black 0px 0px 200px 0px;
+	border-radius: 0.5vw;
+}
+
+.ad-info {
+	background-color: royalblue;
+	color: white;
+	box-shadow: rgba(0, 130, 255, 0.392) 0px 0px 100px 0px;
+}
+
+.ad-example {
+	background-color: purple;
+	color: white;
+}
+
+.tab {
+	margin-left: 4ch;
+}
+
+.vartype {
+	color: purple;
+}
+
+.keyword {
+	color: rgb(95, 135, 255);
+}
+
+.character {
+	color: coral;
+}
+
+img {
+	border-radius: 0.5vw;
+}
+
+.marker {
+	background-color: coral;
+	color: white;
+	padding-left: 0.5vw;
+	padding-right: 0.5vw;
+	border-radius: 0.5vw;
+}
+
+@media screen and (max-width: 768px) {
+	.md-container {
+		padding: 0.2vw;
+		/* max-width: 1200px; */
+		width: 100%;
+	}
+
+	body {
+		font-size: 16px;
+	}
+}
