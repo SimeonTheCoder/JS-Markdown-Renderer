@@ -16,18 +16,56 @@ It's still in early phases of development. Here are the currently supported feat
 - **Bold** & *Italic*, ==Marker==
 - Lists
 - HTML tags, including inline `CSS` and `JS`
+- ==L==a==T==e==X== Math expressions, both inline & math blocks
 
-==Example Usage:==
+The math expressions can be inline: $R = \sqrt{(a_x - b_x)^2 + (a_y - b_y)^2 + (a_z - b_z)^2}$
+
+Or, they can be separated in a block (defined using a math block):
+
+```math
+    \vec{F} = G\dfrac{m_{1}m_{2}}{R^2}
+```
+
+Two columns are also supported. You can use HTML tags in combination with CSS to style the page further.
+
+<div class="two-columns">
+<div class="left-column">
+This is the left column.
+
+```js
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+camera.position.z = 5;
+
+function animate(time) {
+	cube.rotation.x = time / 2000;
+	cube.rotation.y = time / 1000;
+
+	renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+```
+</div>
+<div class="right-column">
+
+This is the right column. It contains a `three.js` snippet that runs in an iframe:
+
+```snippet
+<script src="test.js" type="module" defer></script>
+```
+</div>
+</div>
+
+## ==Example Usage:==
 
 ```js
 import { parseMarkdown } from './markdown-renderer.js';
 
 const str = await parseMarkdown('file.md');
 document.querySelector('markdownContainer').innerHTML = str;
-
-let d = 7;
-
-console.log('a' + d + 'b');
 ```
 
 # ==GIFs== and images, why not!

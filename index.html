@@ -5,16 +5,56 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
 		<link rel="stylesheet" href="./style.css" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css"
+			integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB"
+			crossorigin="anonymous"
+		/>
+		<!-- <script type="importmap">
+			{
+				"imports": {
+					"katex": "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js"
+				}
+			}
+		</script> -->
+		<!-- <script
+			defer
+			src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js"
+		></script> -->
+		<script type="module">
+			import { parseMarkdown } from './markdown-renderer.js';
+
+			const str = await parseMarkdown('README.md');
+			document.querySelector('.md-container').innerHTML = str;
+		</script>
 	</head>
 	<body>
 		<div class="md-container"></div>
 
-		<script src="./markdown-renderer.js" type="module"></script>
+		<script src="./markdown-renderer.js" type="module" defer></script>
 		<script
 			id="MathJax-script"
 			async
 			src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"
+			defer
 		></script>
-		<script src="./script.js" type="module" defer></script>
+		<!-- <script src="./script.js" type="module" defer></script> -->
+		<script defer>
+			// function resizeFrames() {
+			// 	document.querySelectorAll('iframe').forEach((frame) => {
+			// 		console.log(frame);
+			// 		frame.style.height =
+			// 			frame.contentWindow.document.documentElement
+			// 				.offsetHeight + 'px';
+			// 	});
+			// }
+
+			function resizeIframe(obj) {
+				obj.style.height =
+					obj.contentWindow.document.documentElement.scrollHeight +
+					'px';
+			}
+		</script>
 	</body>
 </html>

@@ -1,4 +1,6 @@
+import { createSandbox } from './sandbox.js';
 import { keywords, characters, vars } from './syntax-hightlighting-config.js';
+import katex from 'https://esm.sh/katex';
 
 const tab = '<span class="tab"></span>';
 
@@ -51,9 +53,24 @@ function parseMarker(line, marker, replacementTemplate, applyHighlighting) {
 	return copy;
 }
 
+function renderEquation(equation) {
+	return katex.renderToString(equation);
+}
+
 function finalFormatting(original) {
 	let line = original.replaceAll('    ', tab);
 	line = line.replaceAll('\t', tab);
+
+	if (line.includes('$')) {
+		const tokens = line.split('$');
+
+		let result = '';
+
+		for (let i = 0; i < tokens.length; i++)
+			result += i % 2 == 0 ? tokens[i] : renderEquation(tokens[i]);
+
+		return result;
+	}
 
 	if (line.includes('**')) {
 		line = parseMarker(line, '**', '<b>REPLACE</b>');
@@ -82,7 +99,7 @@ function finalFormatting(original) {
 function handleBlockMarker(line) {
 	if (!isBlock) {
 		blockType = line.slice(3);
-		let className = 'generic-block ' + line.slice(3);
+		let className = 'generic-block ' + blockType;
 
 		isBlock = true;
 		return `<div class="${className}">`;
@@ -148,7 +165,7 @@ function handleListDepth(line) {
 	const indentation = line.length - line.trimStart().length;
 	const correctListLevel = indentation / 4;
 
-	console.log(correctListLevel + ' VS list depth: ' + listLevel);
+	// console.log(correctListLevel + ' VS list depth: ' + listLevel);
 
 	const difference = listLevel - correctListLevel;
 
@@ -163,7 +180,7 @@ function handleListDepth(line) {
 function processLine(line) {
 	let curr = '';
 
-	console.log(listLevel + ', ' + !line.trim().startsWith('-'));
+	// console.log(listLevel + ', ' + !line.trim().startsWith('-'));
 
 	if (listLevel >= 0 && !line.trim().startsWith('-')) {
 		curr += '</ul>'.repeat(listLevel - -1);
@@ -180,17 +197,41 @@ function processLine(line) {
 		return curr + `${finalFormatting(line)}`;
 	if (!isBlock) return curr + `<p>${finalFormatting(line)}</p>`;
 	if (blockType.includes('ad')) return curr + `${finalFormatting(line)}`;
+	if (blockType == 'math') return curr + `${renderEquation(line)}`;
 	return curr + applySyntaxHighlighting(line) + '<br>';
 }
 
 function renderFile(lines) {
 	let constructedHtml = '';
+	let currSnippet = '';
 
 	for (const original of lines) {
+		let wasBlock = isBlock;
+
 		const curr = processLine(original);
+
+		if ((isBlock || wasBlock) && blockType == 'snippet') {
+			if (isBlock && wasBlock) {
+				currSnippet += original + '\n';
+			} else if (wasBlock) {
+				const sandbox = createSandbox(currSnippet);
+				sandbox.onload = 'hello';
+
+				// const iframe = sandbox.outerHTML;
+				const iframe = sandbox.outerHTML.replaceAll(
+					'<iframe',
+					'<iframe onload="resizeIframe(this)" ',
+				);
+				constructedHtml += iframe;
+
+				console.log(currSnippet);
+				currSnippet = '';
+			}
+
+			continue;
+		}
+
 		constructedHtml += curr;
-		console.log(curr);
-		console.log('is block: ' + isBlock);
 	}
 
 	return constructedHtml;
@@ -204,4 +245,6 @@ export async function parseMarkdown(filename) {
 	console.log(constructedHtml);
 
 	document.querySelector('.md-container').innerHTML = constructedHtml;
+
+	resizeFrames();
 }

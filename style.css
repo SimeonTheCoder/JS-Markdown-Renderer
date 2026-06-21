@@ -26,6 +26,37 @@ img {
 	width: 67%;
 }
 
+iframe {
+	width: 100%;
+	border: 0px;
+}
+
+.two-columns {
+	display: grid;
+	grid-template-columns: 50% 50%;
+	gap: 1vw;
+	margin-bottom: 3vw;
+	box-shadow: rgba(0, 0, 0, 0.415) 0px 0px 200px 0px;
+	border-radius: 1vw;
+	padding: 2.5vw;
+	padding-top: 1vw;
+	/* padding-bottom: 2.5vw;
+	padding-right: 2.5vw; */
+	/* border: 1px solid white; */
+}
+
+.left-column .generic-block {
+	height: 85%;
+}
+
+.right-column {
+	height: 100%;
+}
+
+.right-column .generic-block {
+	height: 80%;
+}
+
 h1,
 h2,
 h3,
@@ -51,6 +82,11 @@ h6 {
 	border-radius: 0.5vw;
 	margin-top: 10px;
 	margin-bottom: 10px;
+}
+
+.generic-block.math {
+	display: flex;
+	justify-content: center;
 }
 
 .generic-block-inline {
