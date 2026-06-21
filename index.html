@@ -11,19 +11,18 @@
 			integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB"
 			crossorigin="anonymous"
 		/>
-		<!-- <script type="importmap">
-			{
-				"imports": {
-					"katex": "https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js"
-				}
-			}
-		</script> -->
-		<!-- <script
-			defer
-			src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js"
-		></script> -->
-		<script type="module">
+		<script type="module" defer>
 			import { parseMarkdown } from './markdown-renderer.js';
+			import { updateTheme } from './theme.js';
+
+			updateTheme(Math.random() * 360);
+
+			// let degrees = 90;
+
+			// setInterval(() => {
+			// 	degrees += 0.01;
+			// 	updateTheme(degrees % 360);
+			// }, 1);
 
 			const str = await parseMarkdown('README.md');
 			document.querySelector('.md-container').innerHTML = str;

@@ -97,8 +97,6 @@ function finalFormatting(original) {
 }
 
 function handleBlockMarker(line) {
-	console.log(line);
-
 	if (!isBlock) {
 		blockType = line.slice(3);
 		let className = 'generic-block ' + blockType;
