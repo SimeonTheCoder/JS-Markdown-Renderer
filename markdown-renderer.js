@@ -97,6 +97,8 @@ function finalFormatting(original) {
 }
 
 function handleBlockMarker(line) {
+	console.log(line);
+
 	if (!isBlock) {
 		blockType = line.slice(3);
 		let className = 'generic-block ' + blockType;
@@ -239,7 +241,7 @@ function renderFile(lines) {
 
 export async function parseMarkdown(filename) {
 	const file = await fetch(filename).then((r) => r.text());
-	const lines = file.split('\r\n');
+	const lines = file.split(/\n|\r\n/);
 
 	let constructedHtml = JSON.parse(JSON.stringify(renderFile(lines).trim()));
 	console.log(constructedHtml);
