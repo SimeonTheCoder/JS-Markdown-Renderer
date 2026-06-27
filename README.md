@@ -53,8 +53,45 @@ renderer.setAnimationLoop(animate);
 
 This is the right column. It contains a `three.js` snippet that runs in an iframe:
 
-```snippet
-<script src="test.js" type="module" defer></script>
+```snippet-a
+<script type="module" defer>
+    import setup from './test.js';
+    window.parent.registerStart(setup, @SNIPPET);
+</script>
+```
+</div>
+</div>
+
+<div class="two-columns">
+<div class="left-column">
+This is the left column.
+
+```js
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+camera.position.z = 5;
+
+function animate(time) {
+	cube.rotation.x = time / 2000;
+	cube.rotation.y = time / 1000;
+
+	renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+```
+</div>
+<div class="right-column">
+
+This is the right column. It contains a `three.js` snippet that runs in an iframe:
+
+```snippet-b
+<script type="module" defer>
+    import setup from './test.js';
+    window.parent.registerStart(setup, @SNIPPET);
+</script>
 ```
 </div>
 </div>

@@ -165,8 +165,6 @@ function handleListDepth(line) {
 	const indentation = line.length - line.trimStart().length;
 	const correctListLevel = indentation / 4;
 
-	// console.log(correctListLevel + ' VS list depth: ' + listLevel);
-
 	const difference = listLevel - correctListLevel;
 
 	const correction = (correctListLevel < listLevel ? '</ul>' : '<ul>').repeat(
@@ -179,8 +177,6 @@ function handleListDepth(line) {
 
 function processLine(line) {
 	let curr = '';
-
-	// console.log(listLevel + ', ' + !line.trim().startsWith('-'));
 
 	if (listLevel >= 0 && !line.trim().startsWith('-')) {
 		curr += '</ul>'.repeat(listLevel - -1);
@@ -210,21 +206,28 @@ function renderFile(lines) {
 
 		const curr = processLine(original);
 
-		if ((isBlock || wasBlock) && blockType == 'snippet') {
+		if ((isBlock || wasBlock) && blockType.startsWith('snippet')) {
 			if (isBlock && wasBlock) {
 				currSnippet += original + '\n';
 			} else if (wasBlock) {
+				const snippetId = blockType.slice(8);
+
+				currSnippet = currSnippet
+					.replaceAll('@SNIPPET', `'${snippetId}'`)
+					.replaceAll('@DOCUMENT', 'window.parent');
+
 				const sandbox = createSandbox(currSnippet);
 				sandbox.onload = 'hello';
 
 				// const iframe = sandbox.outerHTML;
 				const iframe = sandbox.outerHTML.replaceAll(
 					'<iframe',
-					'<iframe onload="resizeIframe(this)" ',
+					`<iframe id="${snippetId}" onload="resizeIframe(this)" `,
 				);
+				console.log(iframe);
+
 				constructedHtml += iframe;
 
-				console.log(currSnippet);
 				currSnippet = '';
 			}
 

@@ -17,13 +17,6 @@
 
 			updateTheme(Math.random() * 360);
 
-			// let degrees = 90;
-
-			// setInterval(() => {
-			// 	degrees += 0.01;
-			// 	updateTheme(degrees % 360);
-			// }, 1);
-
 			const str = await parseMarkdown('README.md');
 			document.querySelector('.md-container').innerHTML = str;
 		</script>
@@ -32,24 +25,44 @@
 		<div class="md-container"></div>
 
 		<script src="./markdown-renderer.js" type="module" defer></script>
-		<script
-			id="MathJax-script"
-			async
-			src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"
-			defer
-		></script>
-		<!-- <script src="./script.js" type="module" defer></script> -->
 		<script defer>
-			// function resizeFrames() {
-			// 	document.querySelectorAll('iframe').forEach((frame) => {
-			// 		console.log(frame);
-			// 		frame.style.height =
-			// 			frame.contentWindow.document.documentElement
-			// 				.offsetHeight + 'px';
-			// 	});
-			// }
+			const startQueue = {};
 
-			function resizeIframe(obj) {
+			function registerStart(setup, name) {
+				const result = setup();
+
+				const frame = {
+					data: result.data,
+					start: result.start,
+					stop: result.stop,
+					obj: document.getElementById(name),
+					currState: 'stop',
+				};
+
+				frame.start = frame.start.bind(frame);
+				frame.stop = frame.stop.bind(frame);
+
+				startQueue[name] = frame;
+
+				const observer = new IntersectionObserver((entries) => {
+					const intersecting = entries[0].isIntersecting;
+					setSnippetState(name, intersecting ? 'start' : 'stop');
+				});
+
+				observer.observe(frame.obj);
+			}
+
+			function setSnippetState(name, state) {
+				if (startQueue[name].currState == state) return;
+
+				startQueue[name][state]();
+				startQueue[name].currState = state;
+
+				if (state == 'start') resizeIframe(name);
+			}
+
+			function resizeIframe(id) {
+				const obj = document.getElementById(id);
 				obj.style.height =
 					obj.contentWindow.document.documentElement.scrollHeight +
 					'px';
