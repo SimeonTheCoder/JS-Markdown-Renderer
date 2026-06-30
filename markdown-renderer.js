@@ -13,46 +13,6 @@ function highlight(type, className) {
 	return `<span class="${className}">${type}</span>`;
 }
 
-function parseMarker(line, marker, replacementTemplate, applyHighlighting) {
-	let copy = '';
-	let block = '';
-
-	let inLocalBlock = false;
-
-	for (let i = 0; i < line.length; i++) {
-		let lookahead = '';
-
-		for (let j = 0; j < marker.length && i + j < line.length; j++) {
-			lookahead += line[i + j];
-		}
-
-		if (lookahead == marker) {
-			if (inLocalBlock) {
-				const toAdd = applyHighlighting
-					? applySyntaxHighlighting(block)
-					: block;
-
-				block = '';
-
-				copy += replacementTemplate.replaceAll('REPLACE', toAdd);
-			}
-
-			inLocalBlock = !inLocalBlock;
-			i += marker.length - 1;
-			continue;
-		}
-
-		if (inLocalBlock) {
-			block += line[i];
-			continue;
-		}
-
-		copy += line[i];
-	}
-
-	return copy;
-}
-
 function renderEquation(equation) {
 	return katex.renderToString(equation);
 }
@@ -72,41 +32,27 @@ function finalFormatting(original) {
 		return result;
 	}
 
-	if (line.includes('**')) {
-		line = parseMarker(line, '**', '<b>REPLACE</b>');
-	}
+	line = line.replaceAll(/\*\*([^**]+)\*\*/g, '<b>$1</b>');
+	line = line.replaceAll(/\*([^\*]+)\*/g, '<i>$1</i>');
 
-	if (line.includes('*')) {
-		line = parseMarker(line, '*', '<i>REPLACE</i>');
-	}
-
-	if (line.includes('`')) {
-		line = parseMarker(
-			line,
-			'`',
-			'<div class="generic-block-inline">REPLACE</div>',
-			true,
+	if (line.includes('`'))
+		return line.replaceAll(
+			/`([^`]+)`/g,
+			'<div class="generic-block-inline">$1</div>',
 		);
-	}
 
-	if (line.includes('==')) {
-		line = parseMarker(line, '==', '<span class="marker">REPLACE</span>');
-	}
+	line = line.replaceAll(/==([^=]+)==/g, '<span class="marker">$1</span>');
 
 	return line;
 }
 
 function handleBlockMarker(line) {
-	if (!isBlock) {
-		blockType = line.slice(3);
-		let className = 'generic-block ' + blockType;
+	isBlock = !isBlock;
 
-		isBlock = true;
-		return `<div class="${className}">`;
-	}
+	if (!isBlock) return '</div>';
 
-	isBlock = false;
-	return '</div>';
+	blockType = line.slice(3);
+	return `<div class="generic-block ${blockType}">`;
 }
 
 function handleHeader(line) {
@@ -150,21 +96,16 @@ function applySyntaxHighlighting(line) {
 		);
 	}
 
-	if (line.includes("'")) {
-		formatted = parseMarker(
-			formatted,
-			"'",
-			'<span class="green">\'REPLACE\'</span>',
-		);
-	}
+	formatted = formatted.replaceAll(
+		/'([^']+)'/g,
+		'<span class="green">\'$1\'</span>',
+	);
 
 	return `${finalFormatting(formatted)}`;
 }
 
-function handleListDepth(line) {
-	const indentation = line.length - line.trimStart().length;
+function handleListDepth(line, indentation) {
 	const correctListLevel = indentation / 4;
-
 	const difference = listLevel - correctListLevel;
 
 	const correction = (correctListLevel < listLevel ? '</ul>' : '<ul>').repeat(
@@ -176,25 +117,34 @@ function handleListDepth(line) {
 }
 
 function processLine(line) {
+	const indentation = line.length - line.trimStart().length;
+	const original = line;
+
+	line = line.trim();
+
 	let curr = '';
 
-	if (listLevel >= 0 && !line.trim().startsWith('-')) {
+	if (listLevel >= 0 && !line.startsWith('-')) {
 		curr += '</ul>'.repeat(listLevel - -1);
 		listLevel = -1;
 	}
 
-	if (line.trim().startsWith('-') && !isBlock)
-		return curr + handleListDepth(line);
+	if (line == '') return curr + (isBlock ? '<br>' : '');
 	if (line.startsWith('```')) return curr + handleBlockMarker(line);
-	if (line.trim() == '') return curr + (isBlock ? '<br>' : '');
-	if (line.trim().startsWith('#') && !isBlock)
-		return curr + handleHeader(line);
-	if (line.trim().startsWith('<') && !isBlock)
-		return curr + `${finalFormatting(line)}`;
-	if (!isBlock) return curr + `<p>${finalFormatting(line)}</p>`;
-	if (blockType.includes('ad')) return curr + `${finalFormatting(line)}`;
-	if (blockType == 'math') return curr + `${renderEquation(line)}`;
-	return curr + applySyntaxHighlighting(line) + '<br>';
+
+	if (isBlock) {
+		if (blockType.includes('ad'))
+			return curr + `${finalFormatting(original)}`;
+		if (blockType == 'math') return curr + `${renderEquation(original)}`;
+
+		return curr + applySyntaxHighlighting(original) + '<br>';
+	}
+
+	if (line.startsWith('-')) return curr + handleListDepth(line, indentation);
+	if (line.startsWith('#')) return curr + handleHeader(line);
+	if (line.startsWith('<')) return curr + `${finalFormatting(line)}`;
+
+	return curr + `<p>${finalFormatting(line)}</p>`;
 }
 
 function renderFile(lines) {
@@ -206,34 +156,33 @@ function renderFile(lines) {
 
 		const curr = processLine(original);
 
-		if ((isBlock || wasBlock) && blockType.startsWith('snippet')) {
-			if (isBlock && wasBlock) {
-				currSnippet += original + '\n';
-			} else if (wasBlock) {
-				const snippetId = blockType.slice(8);
-
-				currSnippet = currSnippet
-					.replaceAll('@SNIPPET', `'${snippetId}'`)
-					.replaceAll('@DOCUMENT', 'window.parent');
-
-				const sandbox = createSandbox(currSnippet);
-				sandbox.onload = 'hello';
-
-				// const iframe = sandbox.outerHTML;
-				const iframe = sandbox.outerHTML.replaceAll(
-					'<iframe',
-					`<iframe id="${snippetId}" onload="resizeIframe(this)" `,
-				);
-				console.log(iframe);
-
-				constructedHtml += iframe;
-
-				currSnippet = '';
-			}
-
+		if (!blockType.startsWith('snippet') || (!isBlock && !wasBlock)) {
+			constructedHtml += curr;
 			continue;
 		}
 
+		if (!wasBlock) continue;
+
+		if (isBlock) {
+			currSnippet += original + '\n';
+			continue;
+		}
+
+		const snippetId = blockType.slice(8);
+
+		currSnippet = currSnippet
+			.replaceAll('@SNIPPET', `'${snippetId}'`)
+			.replaceAll('@DOCUMENT', 'window.parent');
+
+		const sandbox = createSandbox(currSnippet);
+		sandbox.onload = 'hello';
+
+		constructedHtml += sandbox.outerHTML.replaceAll(
+			'<iframe',
+			`<iframe id="${snippetId}" onload="resizeIframe(this)" `,
+		);
+
+		currSnippet = '';
 		constructedHtml += curr;
 	}
 
