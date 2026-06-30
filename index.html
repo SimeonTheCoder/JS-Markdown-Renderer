@@ -11,62 +11,23 @@
 			integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB"
 			crossorigin="anonymous"
 		/>
-		<script type="module" defer>
-			import { parseMarkdown } from './markdown-renderer.js';
-			import { updateTheme } from './theme.js';
-
-			updateTheme(Math.random() * 360);
-
-			const str = await parseMarkdown('README.md');
-			document.querySelector('.md-container').innerHTML = str;
-		</script>
+		<script type="module" src="./app.js" defer></script>
 	</head>
 	<body>
+		<header>
+			<nav>
+				<ul>
+					<div style="font-size: 30px">LOGO</div>
+					<div style="width: 50%">
+						<ul id="menu"></ul>
+					</div>
+					<div>🌙</div>
+				</ul>
+			</nav>
+		</header>
 		<div class="md-container"></div>
 
 		<script src="./markdown-renderer.js" type="module" defer></script>
-		<script defer>
-			const startQueue = {};
-
-			function registerStart(setup, name) {
-				const result = setup();
-
-				const frame = {
-					data: result.data,
-					start: result.start,
-					stop: result.stop,
-					obj: document.getElementById(name),
-					currState: 'stop',
-				};
-
-				frame.start = frame.start.bind(frame);
-				frame.stop = frame.stop.bind(frame);
-
-				startQueue[name] = frame;
-
-				const observer = new IntersectionObserver((entries) => {
-					const intersecting = entries[0].isIntersecting;
-					setSnippetState(name, intersecting ? 'start' : 'stop');
-				});
-
-				observer.observe(frame.obj);
-			}
-
-			function setSnippetState(name, state) {
-				if (startQueue[name].currState == state) return;
-
-				startQueue[name][state]();
-				startQueue[name].currState = state;
-
-				if (state == 'start') resizeIframe(name);
-			}
-
-			function resizeIframe(id) {
-				const obj = document.getElementById(id);
-				obj.style.height =
-					obj.contentWindow.document.documentElement.scrollHeight +
-					'px';
-			}
-		</script>
+		<script defer src="./page.js"></script>
 	</body>
 </html>

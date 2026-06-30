@@ -244,10 +244,5 @@ export async function parseMarkdown(filename) {
 	const file = await fetch(filename).then((r) => r.text());
 	const lines = file.split(/\n|\r\n/);
 
-	let constructedHtml = JSON.parse(JSON.stringify(renderFile(lines).trim()));
-	console.log(constructedHtml);
-
-	document.querySelector('.md-container').innerHTML = constructedHtml;
-
-	resizeFrames();
+	return JSON.parse(JSON.stringify(renderFile(lines).trim()));
 }
